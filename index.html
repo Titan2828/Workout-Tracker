@@ -858,68 +858,78 @@
     let isDarkMode = localStorage.getItem('workout_dark_mode') === 'true';
     if (isDarkMode) document.documentElement.classList.add('dark-mode');
 
-    // --- Prebuilt Workout Library ---
+    // --- Expanded Prebuilt Workout Library ---
     const prebuiltWorkouts = {
         male: {
             push: {
-                title: '🔵 PUSH (Chest, Shoulders, Triceps)',
+                title: '🔵 PUSH (Chest, Shoulders, Triceps - Advanced)',
                 exercises: [
-                    { id: 'm-p1', name: 'Barbell Bench Press', sets: 3, reps: '6-8', media: [], completed: false },
+                    { id: 'm-p1', name: 'Barbell Flat Bench Press', sets: 4, reps: '6-8', media: [], completed: false },
                     { id: 'm-p2', name: 'Incline Dumbbell Press', sets: 3, reps: '8-10', media: [], completed: false },
-                    { id: 'm-p3', name: 'Overhead Press (OHP)', sets: 3, reps: '8-10', media: [], completed: false },
-                    { id: 'm-p4', name: 'Lateral Raises', sets: 4, reps: '12-15', media: [], completed: false },
-                    { id: 'm-p5', name: 'Triceps Rope Pushdown', sets: 3, reps: '10-12', media: [], completed: false }
+                    { id: 'm-p3', name: 'Weighted Dips', sets: 3, reps: '8-10', media: [], completed: false },
+                    { id: 'm-p4', name: 'Seated Overhead Barbell Press', sets: 3, reps: '6-8', media: [], completed: false },
+                    { id: 'm-p5', name: 'Cable Lateral Raises', sets: 4, reps: '12-15', media: [], completed: false },
+                    { id: 'm-p6', name: 'Overhead Dumbbell Triceps Extension', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'm-p7', name: 'Triceps Rope Pushdown', sets: 3, reps: '12-15', media: [], completed: false }
                 ]
             },
             pull: {
-                title: '🟢 PULL (Back & Biceps)',
+                title: '🟢 PULL (Back, Traps & Biceps - Advanced)',
                 exercises: [
-                    { id: 'm-pu1', name: 'Pull-Ups / Lat Pulldown', sets: 3, reps: '8-10', media: [], completed: false },
-                    { id: 'm-pu2', name: 'Barbell Row', sets: 3, reps: '6-8', media: [], completed: false },
-                    { id: 'm-pu3', name: 'Seated Cable Row', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'm-pu4', name: 'Face Pulls', sets: 3, reps: '15-20', media: [], completed: false },
-                    { id: 'm-pu5', name: 'Dumbbell Biceps Curl', sets: 3, reps: '10-12', media: [], completed: false }
+                    { id: 'm-pu1', name: 'Weighted Pull-Ups', sets: 4, reps: '6-8', media: [], completed: false },
+                    { id: 'm-pu2', name: 'Barbell Bent-Over Row', sets: 3, reps: '6-8', media: [], completed: false },
+                    { id: 'm-pu3', name: 'Single-Arm Dumbbell Row', sets: 3, reps: '8-10', media: [], completed: false },
+                    { id: 'm-pu4', name: 'Lat Pulldown (Close Grip)', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'm-pu5', name: 'Rear Delt Face Pulls', sets: 4, reps: '15-20', media: [], completed: false },
+                    { id: 'm-pu6', name: 'Barbell Biceps Curl', sets: 3, reps: '8-10', media: [], completed: false },
+                    { id: 'm-pu7', name: 'Incline Dumbbell Hammer Curl', sets: 3, reps: '10-12', media: [], completed: false }
                 ]
             },
             legs: {
-                title: '🟡 LEGS (Lower Body)',
+                title: '🟡 LEGS (Quads, Hamstrings & Calves - Advanced)',
                 exercises: [
-                    { id: 'm-l1', name: 'Barbell Back Squat', sets: 3, reps: '6-8', media: [], completed: false },
+                    { id: 'm-l1', name: 'Barbell Back Squat', sets: 4, reps: '5-8', media: [], completed: false },
                     { id: 'm-l2', name: 'Romanian Deadlift (RDL)', sets: 3, reps: '8-10', media: [], completed: false },
                     { id: 'm-l3', name: 'Leg Press', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'm-l4', name: 'Seated Leg Curl', sets: 3, reps: '12-15', media: [], completed: false },
-                    { id: 'm-l5', name: 'Standing Calf Raises', sets: 4, reps: '12-15', media: [], completed: false }
+                    { id: 'm-l4', name: 'Bulgarian Split Squats', sets: 3, reps: '10-12 per leg', media: [], completed: false },
+                    { id: 'm-l5', name: 'Seated Leg Curl', sets: 3, reps: '12-15', media: [], completed: false },
+                    { id: 'm-l6', name: 'Standing Calf Raises', sets: 4, reps: '12-15', media: [], completed: false }
                 ]
             }
         },
         female: {
             push: {
-                title: '🟣 UPPER BODY PUSH & TONE',
+                title: '🟣 UPPER BODY PUSH & SCULPT',
                 exercises: [
                     { id: 'f-p1', name: 'Dumbbell Bench Press', sets: 3, reps: '8-12', media: [], completed: false },
-                    { id: 'f-p2', name: 'Seated Dumbbell Shoulder Press', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'f-p3', name: 'Cable Lateral Raises', sets: 3, reps: '12-15', media: [], completed: false },
-                    { id: 'f-p4', name: 'Push-Ups (Knee or Standard)', sets: 3, reps: '8-10', media: [], completed: false },
-                    { id: 'f-p5', name: 'Overhead Triceps Extension', sets: 3, reps: '12-15', media: [], completed: false }
+                    { id: 'f-p2', name: 'Incline Chest Flyes', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'f-p3', name: 'Seated Dumbbell Shoulder Press', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'f-p4', name: 'Dumbbell Lateral Raises', sets: 4, reps: '12-15', media: [], completed: false },
+                    { id: 'f-p5', name: 'Push-Ups (Standard or Kneeling)', sets: 3, reps: '8-12', media: [], completed: false },
+                    { id: 'f-p6', name: 'Overhead Triceps Extension', sets: 3, reps: '12-15', media: [], completed: false }
                 ]
             },
             pull: {
                 title: '🟢 UPPER BODY PULL & POSTURE',
                 exercises: [
-                    { id: 'f-pu1', name: 'Lat Pulldown', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'f-pu2', name: 'Single-Arm Dumbbell Row', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'f-pu3', name: 'Face Pulls', sets: 3, reps: '15-20', media: [], completed: false },
-                    { id: 'f-pu4', name: 'Dumbbell Hammer Curls', sets: 3, reps: '12-15', media: [], completed: false }
+                    { id: 'f-pu1', name: 'Lat Pulldown (Wide Grip)', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'f-pu2', name: 'Seated Cable Row', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'f-pu3', name: 'Single-Arm Dumbbell Row', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'f-pu4', name: 'Rear Delt Face Pulls', sets: 3, reps: '15-20', media: [], completed: false },
+                    { id: 'f-pu5', name: 'Dumbbell Biceps Curls', sets: 3, reps: '12-15', media: [], completed: false },
+                    { id: 'f-pu6', name: 'Hammer Curls', sets: 3, reps: '12-15', media: [], completed: false }
                 ]
             },
             legs: {
-                title: '🔴 LOWER BODY & GLUTE BUILDER',
+                title: '🔴 LOWER BODY & GLUTE BUILDER (Comprehensive)',
                 exercises: [
-                    { id: 'f-l1', name: 'Barbell Hip Thrust', sets: 4, reps: '8-10', media: [], completed: false },
-                    { id: 'f-l2', name: 'Goblet Squat', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'f-l1', name: 'Barbell Hip Thrust', sets: 4, reps: '8-12', media: [], completed: false },
+                    { id: 'f-l2', name: 'Goblet Squat (Deep)', sets: 3, reps: '10-12', media: [], completed: false },
                     { id: 'f-l3', name: 'Bulgarian Split Squats', sets: 3, reps: '10-12 per leg', media: [], completed: false },
-                    { id: 'f-l4', name: 'Dumbbell Romanian Deadlift', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'f-l5', name: 'Cable Kickbacks', sets: 3, reps: '12-15', media: [], completed: false }
+                    { id: 'f-l4', name: 'Dumbbell Romanian Deadlift (RDL)', sets: 4, reps: '10-12', media: [], completed: false },
+                    { id: 'f-l5', name: 'Cable Kickbacks', sets: 3, reps: '12-15', media: [], completed: false },
+                    { id: 'f-l6', name: 'Seated Leg Curl', sets: 3, reps: '12-15', media: [], completed: false },
+                    { id: 'f-l7', name: 'Standing Calf Raises', sets: 3, reps: '15-20', media: [], completed: false }
                 ]
             }
         }
@@ -967,6 +977,8 @@
 
     function saveLogsData() {
         applyRetentionPolicy();
+        // Sort chronologically by rawDate descending (latest at top, oldest at bottom)
+        workoutLogs.sort((a, b) => new Date(b.rawDate || b.id) - new Date(a.rawDate || a.id));
         localStorage.setItem('workout_logs_history_v3', JSON.stringify(workoutLogs));
     }
 
