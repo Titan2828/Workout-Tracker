@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Dark, moody Coraline background gradient -->
+    <radialGradient id="coralineBg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="70%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </radialGradient>
+
+    <!-- Shiny dark button gradient -->
+    <radialGradient id="buttonShine" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#475569" />
+      <stop offset="40%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#090d16" />
+    </radialGradient>
+
+    <!-- Eerie blue button glow -->
+    <filter id="buttonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#3b82f6" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- App Rounded Card Background -->
+  <rect width="512" height="512" rx="112" fill="url(#coralineBg)" />
+  
+  <!-- Subtle web rings -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="8 12" opacity="0.4" />
+
+  <!-- Main Button Graphic -->
+  <g filter="url(#buttonGlow)">
+    <!-- Outer Button Body -->
+    <circle cx="256" cy="256" r="148" fill="url(#buttonShine)" stroke="#0f172a" stroke-width="8" />
+    
+    <!-- Inner Button Rim -->
+    <circle cx="256" cy="256" r="124" fill="none" stroke="#020617" stroke-width="10" opacity="0.8" />
+    <circle cx="256" cy="256" r="124" fill="none" stroke="#64748b" stroke-width="2" opacity="0.3" />
+
+    <!-- Four Button Holes (positioned subtly behind/around the dumbbell stitch) -->
+    <circle cx="206" cy="206" r="16" fill="#020617" />
+    <circle cx="306" cy="206" r="16" fill="#020617" />
+    <circle cx="206" cy="306" r="16" fill="#020617" />
+    <circle cx="306" cy="306" r="16" fill="#020617" />
+
+    <!-- Dumbbell Thread / Cross-Stitch Graphic -->
+    <g stroke-linecap="round" stroke-linejoin="round">
+      <!-- Dumbbell Bar / Core Stitch -->
+      <line x1="160" y1="256" x2="352" y2="256" stroke="#1d4ed8" stroke-width="22" />
+      <line x1="160" y1="256" x2="352" y2="256" stroke="#60a5fa" stroke-width="10" />
+
+      <!-- Left Weight Plate Stitches (Thick crossed "X" thread forming the plate block) -->
+      <path d="M160 196 L196 316" stroke="#1d4ed8" stroke-width="20" />
+      <path d="M196 196 L160 316" stroke="#1d4ed8" stroke-width="20" />
+      <path d="M160 196 L196 316" stroke="#93c5fd" stroke-width="8" />
+      <path d="M196 196 L160 316" stroke="#93c5fd" stroke-width="8" />
+
+      <!-- Right Weight Plate Stitches -->
+      <path d="M316 196 L352 316" stroke="#1d4ed8" stroke-width="20" />
+      <path d="M352 196 L316 316" stroke="#1d4ed8" stroke-width="20" />
+      <path d="M316 196 L352 316" stroke="#93c5fd" stroke-width="8" />
+      <path d="M352 196 L316 316" stroke="#93c5fd" stroke-width="8" />
+    </g>
+  </g>
+</svg>
