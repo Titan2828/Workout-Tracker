@@ -1393,9 +1393,21 @@
         if (newTitle !== null) {
             if (newTitle.trim().toUpperCase() === 'DELETE') {
                 removeActiveDay();
-            } else if (newTitle.trim()) {
+            } else if (newTitle.trim() && newTitle.trim() !== day.title) {
+                const oldTitle = day.title;
                 day.title = newTitle.trim();
-                saveData();
+                
+                // CORE FIX: Retroactively update existing logs so history charts stay linked
+                workoutLogs.forEach(log => {
+                    // Match by dayId if it exists, otherwise fallback to oldTitle mapping
+                    if (log.dayId === day.id || (!log.dayId && log.dayTitle === oldTitle)) {
+                        log.dayTitle = day.title; // Update past titles to match the new one
+                        log.dayId = day.id;       // Tag it definitively for the future
+                    }
+                });
+                
+                saveLogsData(); // Save the updated history logs
+                saveData();     // Save the updated routine
                 renderWorkoutView();
             }
         }
@@ -1601,6 +1613,7 @@
 
         const logEntry = {
             id: Date.now(),
+            dayId: day.id, // CORE FIX: Save the permanent Day ID on every log
             rawDate: dateObj.toISOString(),
             timestamp: `${dateStr} at ${timeStr}`,
             dayTitle: day.title,
