@@ -403,7 +403,7 @@
 
         .form-inputs-inline {
             display: flex;
-            gap: 8px;
+            gap: 6px;
         }
 
         .input-cell {
@@ -676,8 +676,38 @@
             font-size: 0.8rem;
             font-weight: 700;
             color: var(--text-main);
-            width: 24px;
+            width: 40px;
             text-align: right;
+        }
+
+        .strength-row {
+            background: var(--modal-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .strength-ex-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+        
+        .strength-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+        
+        .strength-gain {
+            font-weight: 800;
+            color: var(--success);
+            background: var(--completed-bg);
+            padding: 4px 8px;
+            border-radius: 6px;
         }
 
         /* Bottom Tab Bar */
@@ -879,46 +909,49 @@
 </div>
 
 <script>
-    // --- Initial Theme Load ---
+    // --- Initial Theme & Global Settings Load ---
     let isDarkMode = localStorage.getItem('workout_dark_mode') === 'true';
     if (isDarkMode) document.documentElement.classList.add('dark-mode');
+    
+    let weightUnit = localStorage.getItem('workout_weight_unit') || 'kg';
+    let weightType = localStorage.getItem('workout_weight_type') || 'Start'; // "Start" or "End"
 
-    // --- Expanded Prebuilt Workout Library ---
+    // --- Expanded Prebuilt Workout Library (Weights cleared) ---
     const prebuiltWorkouts = {
         male: {
             push: {
                 title: '🔵 PUSH (Chest, Shoulders, Triceps - Advanced)',
                 exercises: [
-                    { id: 'm-p1', name: 'Barbell Flat Bench Press', sets: 4, reps: '6-8', media: [], completed: false },
-                    { id: 'm-p2', name: 'Incline Dumbbell Press', sets: 3, reps: '8-10', media: [], completed: false },
-                    { id: 'm-p3', name: 'Weighted Dips', sets: 3, reps: '8-10', media: [], completed: false },
-                    { id: 'm-p4', name: 'Seated Overhead Barbell Press', sets: 3, reps: '6-8', media: [], completed: false },
-                    { id: 'm-p5', name: 'Cable Lateral Raises', sets: 4, reps: '12-15', media: [], completed: false },
-                    { id: 'm-p6', name: 'Overhead Dumbbell Triceps Extension', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'm-p7', name: 'Triceps Rope Pushdown', sets: 3, reps: '12-15', media: [], completed: false }
+                    { id: 'm-p1', name: 'Barbell Flat Bench Press', sets: 4, reps: '6-8', weight: '', media: [], completed: false },
+                    { id: 'm-p2', name: 'Incline Dumbbell Press', sets: 3, reps: '8-10', weight: '', media: [], completed: false },
+                    { id: 'm-p3', name: 'Weighted Dips', sets: 3, reps: '8-10', weight: '', media: [], completed: false },
+                    { id: 'm-p4', name: 'Seated Overhead Barbell Press', sets: 3, reps: '6-8', weight: '', media: [], completed: false },
+                    { id: 'm-p5', name: 'Cable Lateral Raises', sets: 4, reps: '12-15', weight: '', media: [], completed: false },
+                    { id: 'm-p6', name: 'Overhead Dumbbell Triceps Extension', sets: 3, reps: '10-12', weight: '', media: [], completed: false },
+                    { id: 'm-p7', name: 'Triceps Rope Pushdown', sets: 3, reps: '12-15', weight: '', media: [], completed: false }
                 ]
             },
             pull: {
                 title: '🟢 PULL (Back, Traps & Biceps - Advanced)',
                 exercises: [
-                    { id: 'm-pu1', name: 'Weighted Pull-Ups', sets: 4, reps: '6-8', media: [], completed: false },
-                    { id: 'm-pu2', name: 'Barbell Bent-Over Row', sets: 3, reps: '6-8', media: [], completed: false },
-                    { id: 'm-pu3', name: 'Single-Arm Dumbbell Row', sets: 3, reps: '8-10', media: [], completed: false },
-                    { id: 'm-pu4', name: 'Lat Pulldown (Close Grip)', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'm-pu5', name: 'Rear Delt Face Pulls', sets: 4, reps: '15-20', media: [], completed: false },
-                    { id: 'm-pu6', name: 'Barbell Biceps Curl', sets: 3, reps: '8-10', media: [], completed: false },
-                    { id: 'm-pu7', name: 'Incline Dumbbell Hammer Curl', sets: 3, reps: '10-12', media: [], completed: false }
+                    { id: 'm-pu1', name: 'Weighted Pull-Ups', sets: 4, reps: '6-8', weight: '', media: [], completed: false },
+                    { id: 'm-pu2', name: 'Barbell Bent-Over Row', sets: 3, reps: '6-8', weight: '', media: [], completed: false },
+                    { id: 'm-pu3', name: 'Single-Arm Dumbbell Row', sets: 3, reps: '8-10', weight: '', media: [], completed: false },
+                    { id: 'm-pu4', name: 'Lat Pulldown (Close Grip)', sets: 3, reps: '10-12', weight: '', media: [], completed: false },
+                    { id: 'm-pu5', name: 'Rear Delt Face Pulls', sets: 4, reps: '15-20', weight: '', media: [], completed: false },
+                    { id: 'm-pu6', name: 'Barbell Biceps Curl', sets: 3, reps: '8-10', weight: '', media: [], completed: false },
+                    { id: 'm-pu7', name: 'Incline Dumbbell Hammer Curl', sets: 3, reps: '10-12', weight: '', media: [], completed: false }
                 ]
             },
             legs: {
                 title: '🟡 LEGS (Quads, Hamstrings & Calves - Advanced)',
                 exercises: [
-                    { id: 'm-l1', name: 'Barbell Back Squat', sets: 4, reps: '5-8', media: [], completed: false },
-                    { id: 'm-l2', name: 'Romanian Deadlift (RDL)', sets: 3, reps: '8-10', media: [], completed: false },
-                    { id: 'm-l3', name: 'Leg Press', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'm-l4', name: 'Bulgarian Split Squats', sets: 3, reps: '10-12 per leg', media: [], completed: false },
-                    { id: 'm-l5', name: 'Seated Leg Curl', sets: 3, reps: '12-15', media: [], completed: false },
-                    { id: 'm-l6', name: 'Standing Calf Raises', sets: 4, reps: '12-15', media: [], completed: false }
+                    { id: 'm-l1', name: 'Barbell Back Squat', sets: 4, reps: '5-8', weight: '', media: [], completed: false },
+                    { id: 'm-l2', name: 'Romanian Deadlift (RDL)', sets: 3, reps: '8-10', weight: '', media: [], completed: false },
+                    { id: 'm-l3', name: 'Leg Press', sets: 3, reps: '10-12', weight: '', media: [], completed: false },
+                    { id: 'm-l4', name: 'Bulgarian Split Squats', sets: 3, reps: '10-12 per leg', weight: '', media: [], completed: false },
+                    { id: 'm-l5', name: 'Seated Leg Curl', sets: 3, reps: '12-15', weight: '', media: [], completed: false },
+                    { id: 'm-l6', name: 'Standing Calf Raises', sets: 4, reps: '12-15', weight: '', media: [], completed: false }
                 ]
             }
         },
@@ -926,35 +959,35 @@
             push: {
                 title: '🟣 UPPER BODY PUSH & SCULPT',
                 exercises: [
-                    { id: 'f-p1', name: 'Dumbbell Bench Press', sets: 3, reps: '8-12', media: [], completed: false },
-                    { id: 'f-p2', name: 'Incline Chest Flyes', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'f-p3', name: 'Seated Dumbbell Shoulder Press', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'f-p4', name: 'Dumbbell Lateral Raises', sets: 4, reps: '12-15', media: [], completed: false },
-                    { id: 'f-p5', name: 'Push-Ups (Standard or Kneeling)', sets: 3, reps: '8-12', media: [], completed: false },
-                    { id: 'f-p6', name: 'Overhead Triceps Extension', sets: 3, reps: '12-15', media: [], completed: false }
+                    { id: 'f-p1', name: 'Dumbbell Bench Press', sets: 3, reps: '8-12', weight: '', media: [], completed: false },
+                    { id: 'f-p2', name: 'Incline Chest Flyes', sets: 3, reps: '10-12', weight: '', media: [], completed: false },
+                    { id: 'f-p3', name: 'Seated Dumbbell Shoulder Press', sets: 3, reps: '10-12', weight: '', media: [], completed: false },
+                    { id: 'f-p4', name: 'Dumbbell Lateral Raises', sets: 4, reps: '12-15', weight: '', media: [], completed: false },
+                    { id: 'f-p5', name: 'Push-Ups (Standard or Kneeling)', sets: 3, reps: '8-12', weight: '', media: [], completed: false },
+                    { id: 'f-p6', name: 'Overhead Triceps Extension', sets: 3, reps: '12-15', weight: '', media: [], completed: false }
                 ]
             },
             pull: {
                 title: '🟢 UPPER BODY PULL & POSTURE',
                 exercises: [
-                    { id: 'f-pu1', name: 'Lat Pulldown (Wide Grip)', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'f-pu2', name: 'Seated Cable Row', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'f-pu3', name: 'Single-Arm Dumbbell Row', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'f-pu4', name: 'Rear Delt Face Pulls', sets: 3, reps: '15-20', media: [], completed: false },
-                    { id: 'f-pu5', name: 'Dumbbell Biceps Curls', sets: 3, reps: '12-15', media: [], completed: false },
-                    { id: 'f-pu6', name: 'Hammer Curls', sets: 3, reps: '12-15', media: [], completed: false }
+                    { id: 'f-pu1', name: 'Lat Pulldown (Wide Grip)', sets: 3, reps: '10-12', weight: '', media: [], completed: false },
+                    { id: 'f-pu2', name: 'Seated Cable Row', sets: 3, reps: '10-12', weight: '', media: [], completed: false },
+                    { id: 'f-pu3', name: 'Single-Arm Dumbbell Row', sets: 3, reps: '10-12', weight: '', media: [], completed: false },
+                    { id: 'f-pu4', name: 'Rear Delt Face Pulls', sets: 3, reps: '15-20', weight: '', media: [], completed: false },
+                    { id: 'f-pu5', name: 'Dumbbell Biceps Curls', sets: 3, reps: '12-15', weight: '', media: [], completed: false },
+                    { id: 'f-pu6', name: 'Hammer Curls', sets: 3, reps: '12-15', weight: '', media: [], completed: false }
                 ]
             },
             legs: {
                 title: '🔴 LOWER BODY & GLUTE BUILDER (Comprehensive)',
                 exercises: [
-                    { id: 'f-l1', name: 'Barbell Hip Thrust', sets: 4, reps: '8-12', media: [], completed: false },
-                    { id: 'f-l2', name: 'Goblet Squat (Deep)', sets: 3, reps: '10-12', media: [], completed: false },
-                    { id: 'f-l3', name: 'Bulgarian Split Squats', sets: 3, reps: '10-12 per leg', media: [], completed: false },
-                    { id: 'f-l4', name: 'Dumbbell Romanian Deadlift (RDL)', sets: 4, reps: '10-12', media: [], completed: false },
-                    { id: 'f-l5', name: 'Cable Kickbacks', sets: 3, reps: '12-15', media: [], completed: false },
-                    { id: 'f-l6', name: 'Seated Leg Curl', sets: 3, reps: '12-15', media: [], completed: false },
-                    { id: 'f-l7', name: 'Standing Calf Raises', sets: 3, reps: '15-20', media: [], completed: false }
+                    { id: 'f-l1', name: 'Barbell Hip Thrust', sets: 4, reps: '8-12', weight: '', media: [], completed: false },
+                    { id: 'f-l2', name: 'Goblet Squat (Deep)', sets: 3, reps: '10-12', weight: '', media: [], completed: false },
+                    { id: 'f-l3', name: 'Bulgarian Split Squats', sets: 3, reps: '10-12 per leg', weight: '', media: [], completed: false },
+                    { id: 'f-l4', name: 'Dumbbell Romanian Deadlift (RDL)', sets: 4, reps: '10-12', weight: '', media: [], completed: false },
+                    { id: 'f-l5', name: 'Cable Kickbacks', sets: 3, reps: '12-15', weight: '', media: [], completed: false },
+                    { id: 'f-l6', name: 'Seated Leg Curl', sets: 3, reps: '12-15', weight: '', media: [], completed: false },
+                    { id: 'f-l7', name: 'Standing Calf Raises', sets: 3, reps: '15-20', weight: '', media: [], completed: false }
                 ]
             }
         }
@@ -966,19 +999,19 @@
             id: 'day-1',
             title: '🟥 WORKOUT 1 — CHEST + SHOULDERS + TRICEPS',
             exercises: [
-                { id: '1', name: 'Bench Press', sets: 3, reps: '6–10', media: [], completed: false },
-                { id: '2', name: 'Incline Dumbbell Press', sets: 3, reps: '8–12', media: [], completed: false },
-                { id: '3', name: 'Cable Fly / Pec Deck', sets: 2, reps: '10–15', media: [], completed: false },
-                { id: '4', name: 'Shoulder Press', sets: 3, reps: '8–12', media: [], completed: false },
-                { id: '5', name: 'Lateral Raises', sets: 3, reps: '12–15', media: [], completed: false },
-                { id: '6', name: 'Triceps Pushdown', sets: 3, reps: '10–15', media: [], completed: false },
-                { id: '7', name: 'Overhead Triceps Extension', sets: 2, reps: '10–15', media: [], completed: false }
+                { id: '1', name: 'Bench Press', sets: 3, reps: '6–10', weight: '', media: [], completed: false },
+                { id: '2', name: 'Incline Dumbbell Press', sets: 3, reps: '8–12', weight: '', media: [], completed: false },
+                { id: '3', name: 'Cable Fly / Pec Deck', sets: 2, reps: '10–15', weight: '', media: [], completed: false },
+                { id: '4', name: 'Shoulder Press', sets: 3, reps: '8–12', weight: '', media: [], completed: false },
+                { id: '5', name: 'Lateral Raises', sets: 3, reps: '12–15', weight: '', media: [], completed: false },
+                { id: '6', name: 'Triceps Pushdown', sets: 3, reps: '10–15', weight: '', media: [], completed: false },
+                { id: '7', name: 'Overhead Triceps Extension', sets: 2, reps: '10–15', weight: '', media: [], completed: false }
             ]
         }
     ];
 
-    let routine = JSON.parse(localStorage.getItem('workout_routine_v7')) || defaultData;
-    let workoutLogs = JSON.parse(localStorage.getItem('workout_logs_history_v3')) || [];
+    let routine = JSON.parse(localStorage.getItem('workout_routine_v10')) || defaultData;
+    let workoutLogs = JSON.parse(localStorage.getItem('workout_logs_history_v6')) || [];
     let retentionMonths = parseInt(localStorage.getItem('workout_retention_months')) || 12;
 
     let activeDayId = routine.length > 0 ? routine[0].id : null;
@@ -991,10 +1024,11 @@
     let calYear = new Date().getFullYear();
     let calMonth = new Date().getMonth();
     let analyticsRange = '30d';
+    let strengthRange = '30d';
 
     function saveData() {
         try {
-            localStorage.setItem('workout_routine_v7', JSON.stringify(routine));
+            localStorage.setItem('workout_routine_v10', JSON.stringify(routine));
         } catch(e) {
             alert('Storage limit reached! Avoid uploading large raw images directly.');
         }
@@ -1003,7 +1037,7 @@
     function saveLogsData() {
         applyRetentionPolicy();
         workoutLogs.sort((a, b) => new Date(b.rawDate || b.id) - new Date(a.rawDate || a.id));
-        localStorage.setItem('workout_logs_history_v3', JSON.stringify(workoutLogs));
+        localStorage.setItem('workout_logs_history_v6', JSON.stringify(workoutLogs));
     }
 
     function applyRetentionPolicy() {
@@ -1042,7 +1076,9 @@
         const data = {
             routine: routine,
             logs: workoutLogs,
-            retention: retentionMonths
+            retention: retentionMonths,
+            weightUnit: weightUnit,
+            weightType: weightType
         };
         const dataStr = JSON.stringify(data);
         const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
@@ -1067,10 +1103,14 @@
                     routine = data.routine;
                     workoutLogs = data.logs || [];
                     retentionMonths = parseInt(data.retention) || 12;
+                    weightUnit = data.weightUnit || 'kg';
+                    weightType = data.weightType || 'Start';
                     
                     saveData();
                     saveLogsData();
                     localStorage.setItem('workout_retention_months', retentionMonths);
+                    localStorage.setItem('workout_weight_unit', weightUnit);
+                    localStorage.setItem('workout_weight_type', weightType);
                     
                     alert('✅ Backup imported successfully!');
                     switchLogTab('list');
@@ -1188,7 +1228,8 @@
                         
                         <div class="form-inputs-inline" style="margin-top:10px;">
                             <input type="number" class="input-cell" id="inline-sets" value="${ex.sets}" placeholder="Sets" style="flex:1;" required>
-                            <input type="text" class="input-cell" id="inline-reps" value="${ex.reps}" placeholder="Reps (e.g. 8-12)" style="flex:2;" required>
+                            <input type="text" class="input-cell" id="inline-reps" value="${ex.reps}" placeholder="Reps (e.g. 8-12)" style="flex:1;" required>
+                            <input type="number" class="input-cell" id="inline-weight" value="${ex.weight || ''}" placeholder="${weightType} Wt (${weightUnit})" style="flex:1.5;" step="any">
                         </div>
                         
                         <div style="margin-top:16px; background:var(--bg-color); padding:12px; border-radius:8px; border:1px dashed var(--border-color);">
@@ -1223,13 +1264,15 @@
             } else {
                 li.setAttribute('draggable', 'false');
                 
+                const weightDisplay = ex.weight ? ` • ${weightType} Wt: ${ex.weight} ${weightUnit}` : '';
+                
                 li.innerHTML = `
                     <div class="drag-handle" draggable="true" title="Drag to reorder">≡</div>
                     <div class="left-content" onclick="toggleExercise('${activeDay.id}', '${ex.id}')">
                         <input type="checkbox" class="checkbox" ${ex.completed ? 'checked' : ''} onclick="event.stopPropagation(); toggleExercise('${activeDay.id}', '${ex.id}')">
                         <div class="ex-info">
                             <span class="ex-name">${ex.name || 'New Exercise'}</span>
-                            <span class="ex-details">${ex.sets} sets × ${ex.reps} reps</span>
+                            <span class="ex-details">${ex.sets} sets × ${ex.reps} reps${weightDisplay}</span>
                             ${ex.media && ex.media.length > 0 ? `<span class="attachment-tag">📎 Tap arrow to view (${ex.media.length})</span>` : ''}
                         </div>
                     </div>
@@ -1378,6 +1421,7 @@
             name: '',
             sets: 3,
             reps: '8-12',
+            weight: '',
             media: [],
             completed: false
         };
@@ -1425,6 +1469,7 @@
         ex.name = document.getElementById('inline-name').value.trim() || 'Untitled Exercise';
         ex.sets = document.getElementById('inline-sets').value || 1;
         ex.reps = document.getElementById('inline-reps').value.trim() || '1';
+        ex.weight = document.getElementById('inline-weight').value.trim() || '';
         ex.media = [...tempEditMedia];
         
         saveData();
@@ -1544,12 +1589,23 @@
         const dateStr = dateObj.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
         const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+        const exercisesData = completedEx.map(e => {
+            const wtNum = e.weight ? parseFloat(e.weight) : 0;
+            const wtStr = e.weight ? ` @ ${weightType} Wt: ${e.weight} ${weightUnit}` : '';
+            return {
+                name: e.name,
+                text: `${e.name} (${e.sets} × ${e.reps}${wtStr})`,
+                weightValue: wtNum
+            };
+        });
+
         const logEntry = {
             id: Date.now(),
             rawDate: dateObj.toISOString(),
             timestamp: `${dateStr} at ${timeStr}`,
             dayTitle: day.title,
-            exercises: completedEx.map(e => `${e.name} (${e.sets} × ${e.reps})`)
+            exercises: exercisesData.map(ed => ed.text),
+            exerciseDetails: exercisesData
         };
 
         workoutLogs.unshift(logEntry);
@@ -1601,6 +1657,31 @@
                     <input type="checkbox" id="dark-mode-toggle" ${isDarkMode ? 'checked' : ''} onchange="toggleDarkMode()">
                     <span class="slider round"></span>
                 </label>
+            </div>
+
+            <!-- Weight Preferences (Unit & Type) -->
+            <div class="analytics-card" style="margin-bottom:12px;">
+                <div class="analytics-title" style="font-size:0.9rem;">Weight Tracking Preferences</div>
+                <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:10px;">
+                    Set your measurement unit and preferred logging style. These apply globally to all exercises.
+                </div>
+                
+                <div style="display:flex; gap:8px; margin-bottom:8px;">
+                    <div style="flex:1;">
+                        <label style="font-size:0.75rem; font-weight:600; color:var(--text-main); margin-bottom:4px; display:block;">Unit of Measurement</label>
+                        <select id="weight-unit-select" class="input-cell" onchange="setWeightUnit(this.value)" style="padding:8px; font-size:0.85rem;">
+                            <option value="kg" ${weightUnit==='kg'?'selected':''}>Kilograms (kg)</option>
+                            <option value="lb" ${weightUnit==='lb'?'selected':''}>Pounds (lb)</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size:0.75rem; font-weight:600; color:var(--text-main); margin-bottom:4px; display:block;">Track Weight As</label>
+                        <select id="weight-type-select" class="input-cell" onchange="setWeightType(this.value)" style="padding:8px; font-size:0.85rem;">
+                            <option value="Start" ${weightType==='Start'?'selected':''}>Start Weight</option>
+                            <option value="End" ${weightType==='End'?'selected':''}>End Weight</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <!-- Prebuilt Workouts Generator -->
@@ -1789,6 +1870,7 @@
     }
 
     function renderAnalytics(container) {
+        // 1. Workout Distribution Counts
         const counts = {};
         let totalCount = 0;
 
@@ -1830,7 +1912,75 @@
             }).join('');
         }
 
+        // 2. Strength & Weight Progression (Tracking chronological progression)
+        const strengthFilteredLogs = workoutLogs.filter(log => {
+            const dt = new Date(log.rawDate || log.id);
+            const diffTime = now - dt;
+            const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+            if(strengthRange === '30d') return diffDays <= 30;
+            if(strengthRange === '3m') return diffDays <= 90;
+            if(strengthRange === '6m') return diffDays <= 180;
+            if(strengthRange === '1y') return diffDays <= 365;
+            return true;
+        });
+
+        // Logs are sorted newest first. Reverse to iterate chronological (oldest to newest)
+        const sortedLogs = [...strengthFilteredLogs].reverse();
+        const strengthData = {}; // { exerciseName: { first: val, max: val } }
+
+        sortedLogs.forEach(log => {
+            if (log.exerciseDetails && Array.isArray(log.exerciseDetails)) {
+                log.exerciseDetails.forEach(ed => {
+                    if (ed.weightValue > 0) {
+                        if (!strengthData[ed.name]) {
+                            strengthData[ed.name] = { first: ed.weightValue, max: ed.weightValue };
+                        } else {
+                            if (ed.weightValue > strengthData[ed.name].max) {
+                                strengthData[ed.name].max = ed.weightValue;
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        let strengthHtml = '';
+        const strengthEntries = Object.entries(strengthData);
+        
+        if (strengthEntries.length === 0) {
+            strengthHtml = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:0.85rem;">No weight progression data recorded for this range. Input weights when logging exercises to see your progress!</div>`;
+        } else {
+            // Sort to show highest gains first
+            strengthEntries.sort((a, b) => {
+                const gainA = a[1].max - a[1].first;
+                const gainB = b[1].max - b[1].first;
+                return gainB - gainA;
+            });
+
+            strengthHtml = strengthEntries.map(([name, data]) => {
+                const gain = data.max - data.first;
+                const gainDisplay = gain > 0 ? `+${gain.toFixed(1)} ${weightUnit}` : `0 ${weightUnit}`;
+                const gainStyle = gain > 0 ? '' : 'color: var(--text-muted); background: var(--border-color);';
+
+                return `
+                    <div class="strength-row">
+                        <div class="strength-ex-title">${name}</div>
+                        <div class="strength-stats">
+                            <div>
+                                <span style="color:var(--text-muted);">First:</span> <span style="font-weight:600; color:var(--text-main);">${data.first}</span>
+                                <span style="margin: 0 6px; color:var(--text-muted);">→</span>
+                                <span style="color:var(--text-muted);">Peak:</span> <span style="font-weight:600; color:var(--text-main);">${data.max}</span>
+                            </div>
+                            <div class="strength-gain" style="${gainStyle}">${gainDisplay}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         container.innerHTML = `
+            <!-- Workout Distribution Card -->
             <div class="analytics-card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <div class="analytics-title" style="margin:0;">Workout Distribution</div>
@@ -1851,6 +2001,28 @@
                     ${barsHtml}
                 </div>
             </div>
+
+            <!-- Strength & Weight Progression Card -->
+            <div class="analytics-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <div class="analytics-title" style="margin:0;">${weightType} Weight Progress</div>
+                    <div style="display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px; max-width:65%;">
+                        <button class="subnav-btn ${strengthRange==='30d'?'active':''}" onclick="setStrengthRange('30d')" style="padding:4px 6px; font-size:0.7rem; flex:none;">30d</button>
+                        <button class="subnav-btn ${strengthRange==='3m'?'active':''}" onclick="setStrengthRange('3m')" style="padding:4px 6px; font-size:0.7rem; flex:none;">3m</button>
+                        <button class="subnav-btn ${strengthRange==='6m'?'active':''}" onclick="setStrengthRange('6m')" style="padding:4px 6px; font-size:0.7rem; flex:none;">6m</button>
+                        <button class="subnav-btn ${strengthRange==='1y'?'active':''}" onclick="setStrengthRange('1y')" style="padding:4px 6px; font-size:0.7rem; flex:none;">1y</button>
+                        <button class="subnav-btn ${strengthRange==='all'?'active':''}" onclick="setStrengthRange('all')" style="padding:4px 6px; font-size:0.7rem; flex:none;">All</button>
+                    </div>
+                </div>
+                
+                <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:14px;">
+                    Comparing your first logged <strong>${weightType.toLowerCase()} weight</strong> to your peak logged weight within this timeframe.
+                </div>
+
+                <div>
+                    ${strengthHtml}
+                </div>
+            </div>
         `;
     }
 
@@ -1859,7 +2031,12 @@
         renderLogsView();
     }
 
-    // --- Dark Mode Logic ---
+    function setStrengthRange(range) {
+        strengthRange = range;
+        renderLogsView();
+    }
+
+    // --- Global Settings Logic ---
     function toggleDarkMode() {
         isDarkMode = document.getElementById('dark-mode-toggle').checked;
         if (isDarkMode) {
@@ -1868,6 +2045,18 @@
             document.documentElement.classList.remove('dark-mode');
         }
         localStorage.setItem('workout_dark_mode', isDarkMode);
+    }
+
+    function setWeightUnit(unit) {
+        weightUnit = unit;
+        localStorage.setItem('workout_weight_unit', weightUnit);
+        renderWorkoutView();
+    }
+
+    function setWeightType(type) {
+        weightType = type;
+        localStorage.setItem('workout_weight_type', weightType);
+        renderWorkoutView();
     }
 
     function setRetention(months) {
