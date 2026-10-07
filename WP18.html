@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Tracker & Logs</title>
+    <style>
+        :root {
+            /* Light Theme Variables */
+            --bg-color: #f7f8fa;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent-blue: #007aff;
+            --accent-red: #e63946;
+            --success: #34c759;
+            --border-color: #e2e8f0;
+            --input-bg: #ffffff;
+            --nav-bg: #ffffff;
+            --modal-bg: #f8fafc;
+            --completed-bg: #f0fdf4;
+            --pill-active-bg: #0f172a;
+            --pill-active-text: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.04);
+        }
+
+        :root.dark-mode {
+            /* Dark Theme Variables */
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-red: #ef4444;
+            --success: #22c55e;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+            --nav-bg: #1e293b;
+            --modal-bg: #0f172a;
+            --completed-bg: rgba(34, 197, 94, 0.1);
+            --pill-active-bg: #3b82f6;
+            --pill-active-text: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 16px 12px 80px 12px;
+            display: flex;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        /* Views */
+        .view {
+            display: none;
+        }
+        .view.active {
+            display: block;
+        }
+
+        /* Top Header */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            margin-bottom: 20px;
+            padding: 0 4px;
+        }
+
+        .app-title {
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .header-link {
+            color: var(--accent-blue);
+            font-size: 0.95rem;
+            font-weight: 500;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        /* Day Tabs Pill Bar */
+        .day-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 0 16px 0;
+            scrollbar-width: none;
+        }
+
+        .day-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-pill {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-pill.active {
+            background: var(--pill-active-bg);
+            color: var(--pill-active-text);
+            border-color: var(--pill-active-bg);
+        }
+
+        /* Day Title Row */
+        .day-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 0 4px;
+        }
+
+        .day-title-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .current-day-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-main);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn-edit-day {
+            background: var(--border-color);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Main Workout Card */
+        .workout-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px var(--shadow-color);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        /* Exercise Row List */
+        .exercise-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .exercise-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-bg);
+            transition: background-color 0.15s ease, transform 0.15s ease, border-top 0.15s ease;
+        }
+
+        .exercise-row:last-child {
+            border-bottom: none;
+        }
+
+        .exercise-row.dragging {
+            opacity: 0.4;
+            background: var(--modal-bg);
+            border: 2px dashed var(--accent-blue);
+        }
+
+        .exercise-row.drag-over {
+            border-top: 3px solid var(--accent-blue);
+        }
+
+        .exercise-row.completed {
+            background: var(--completed-bg);
+        }
+
+        .exercise-row.completed .ex-name {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .left-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .drag-handle {
+            cursor: grab;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            touch-action: none;
+            padding: 0 6px 4px 0;
+            line-height: 1;
+        }
+
+        .checkbox {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .ex-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ex-name {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+
+        .ex-details {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .attachment-tag {
+            font-size: 0.7rem;
+            color: var(--accent-blue);
+            margin-top: 2px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .action-btns {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-icon:hover {
+            color: var(--accent-blue);
+            background: var(--border-color);
+        }
+
+        .exercise-row.expanded .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Expand Drawer */
+        .drawer {
+            display: none;
+            padding: 12px;
+            background: var(--modal-bg);
+            border-top: 1px dashed var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+            position: relative;
+        }
+
+        .exercise-row.expanded + .drawer {
+            display: block;
+        }
+
+        .media-preview {
+            max-width: 100%;
+            max-height: 220px;
+            border-radius: 10px;
+            object-fit: contain;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+            margin-bottom: 8px;
+        }
+        
+        .media-preview:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Bottom Add Exercise Bar */
+        .add-exercise-btn-container {
+            padding: 14px;
+            text-align: center;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-add-exercise {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Inline Edit Container */
+        .inline-edit-container {
+            width: 100%;
+            padding: 16px;
+            background: var(--modal-bg);
+        }
+
+        .form-inputs-inline {
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-cell {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            background: var(--input-bg);
+            outline: none;
+            -webkit-user-select: text;
+            user-select: text;
+            font-family: inherit;
+        }
+
+        .input-cell:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .form-btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            background: var(--accent-blue);
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .btn-cancel {
+            background: var(--border-color);
+            color: var(--text-main);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Save Log Button */
+        .btn-save-log {
+            width: 100%;
+            background: var(--pill-active-bg);
+            color: var(--pill-active-text);
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px var(--shadow-color);
+        }
+
+        .btn-save-log:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            color: var(--card-bg);
+        }
+
+        /* Logs & Analytics View Styling */
+        .logs-subnav {
+            display: flex;
+            background: var(--border-color);
+            border-radius: 12px;
+            padding: 3px;
+            margin-bottom: 16px;
+        }
+
+        .subnav-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .subnav-btn.active {
+            background: var(--card-bg);
+            color: var(--text-main);
+            box-shadow: 0 2px 6px var(--shadow-color);
+        }
+
+        .log-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 12px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .log-date {
+            font-size: 0.8rem;
+            color: var(--accent-blue);
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .log-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+
+        .log-items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .log-items li {
+            padding: 4px 0;
+            border-bottom: 1px dashed var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .log-items li:last-child {
+            border-bottom: none;
+        }
+
+        /* Calendar View Styling */
+        .calendar-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 12px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            text-align: center;
+        }
+
+        .cal-day-header {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding-bottom: 6px;
+        }
+
+        .cal-cell {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            background: var(--modal-bg);
+            border: 1px solid var(--border-color);
+            position: relative;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        .cal-cell.has-workout {
+            background: var(--completed-bg);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .cal-cell.empty {
+            background: transparent;
+            border: none;
+            cursor: default;
+        }
+
+        /* Analytics Graph Card */
+        .analytics-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 12px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .analytics-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+
+        .bar-chart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bar-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 12px;
+            background: var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: var(--accent-blue);
+            border-radius: 6px;
+            transition: width 0.4s ease;
+        }
+
+        .bar-count {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            width: 24px;
+            text-align: right;
+        }
+
+        /* Bottom Tab Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--nav-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 500px;
+            margin: 0 auto;
+            z-index: 100;
+            padding-bottom: env(safe-area-inset-bottom, 10px);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .nav-item.active {
+            color: var(--accent-blue);
+        }
+
+        .nav-dot {
+            width: 4px;
+            height: 4px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            margin-top: 4px;
+            opacity: 0;
+        }
+        
+        .nav-item.active .nav-dot {
+            opacity: 1;
+        }
+
+        /* Dark Mode Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 26px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--border-color);
+            transition: .3s;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #ffffff;
+            transition: .3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        input:checked + .slider {
+            background-color: var(--accent-blue);
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        .slider.round {
+            border-radius: 26px;
+        }
+        .slider.round:before {
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- WORKOUT VIEW -->
+    <div id="view-workout" class="view active">
+        <div class="top-header">
+            <h1 class="app-title">Log Workout</h1>
+            <div class="header-actions">
+                <button class="header-link" onclick="promptAddDay()">+ Day</button>
+            </div>
+        </div>
+
+        <!-- Day Tabs Pill Bar -->
+        <div class="day-tabs" id="day-tabs"></div>
+
+        <div class="day-title-row">
+            <div class="day-title-left">
+                <span class="current-day-name" id="day-main-title">Day 3 - Push</span>
+                <button class="btn-edit-day" onclick="openDayEditModal()" title="Edit or Delete Day">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                </button>
+            </div>
+            <button class="header-link" onclick="resetChecklist()" style="font-size: 0.85rem;">Reset All</button>
+        </div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <!-- Workout Table Card -->
+        <div class="workout-card">
+            <ul class="exercise-list" id="exercise-list"></ul>
+            
+            <div class="add-exercise-btn-container" id="add-btn-wrapper">
+                <button class="btn-add-exercise" onclick="addNewExercise()">
+                    <span>+</span> Add exercise
+                </button>
+            </div>
+        </div>
+
+        <button class="btn-save-log" id="btn-log-workout" onclick="saveWorkoutLog()">Save to Calendar Log</button>
+    </div>
+
+    <!-- LOGS, CALENDAR & INSIGHTS VIEW -->
+    <div id="view-logs" class="view">
+        <div class="top-header">
+            <h1 class="app-title">History & Insights</h1>
+            <div class="header-actions">
+                <button class="btn-icon" onclick="switchLogTab('settings')" title="Settings" style="background:var(--border-color); padding:8px; color:var(--text-main);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Subnav for List / Calendar / Insights / Settings -->
+        <div class="logs-subnav" id="logs-subnav-bar">
+            <button class="subnav-btn active" id="subnav-list" onclick="switchLogTab('list')">List Logs</button>
+            <button class="subnav-btn" id="subnav-calendar" onclick="switchLogTab('calendar')">Calendar</button>
+            <button class="subnav-btn" id="subnav-analytics" onclick="switchLogTab('analytics')">Insights</button>
+        </div>
+
+        <div id="logs-content-area"></div>
+    </div>
+    
+    <!-- Log Edit Modal Overlay -->
+    <div class="add-form-container" id="log-edit-modal" style="display:none; position:fixed; bottom:70px; left:0; right:0; max-width:500px; margin:0 auto; z-index:200; border-radius: 16px 16px 0 0; box-shadow: 0 -4px 20px var(--shadow-color); padding: 16px; background: var(--modal-bg); border-top: 1px solid var(--border-color);">
+        <div style="margin-bottom:12px; font-weight:800; font-size:1.1rem; color:var(--text-main);">Edit Log & Date</div>
+        <input type="hidden" id="edit-log-id">
+        
+        <label style="font-size:0.8rem; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Workout Title</label>
+        <input type="text" class="input-cell" id="edit-log-title" style="margin-bottom:10px;" placeholder="Workout Title">
+        
+        <label style="font-size:0.8rem; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Session Date</label>
+        <input type="date" class="input-cell" id="edit-log-date-picker" style="margin-bottom:10px;">
+        
+        <label style="font-size:0.8rem; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Exercises</label>
+        <textarea class="input-cell" id="edit-log-exercises" rows="4" style="margin-bottom:10px; resize:none;" placeholder="Exercises (one per line)"></textarea>
+        
+        <div class="form-btn-row">
+            <button class="btn-submit" onclick="saveLogEdit()">Save Log</button>
+            <button class="btn-cancel" onclick="closeLogEdit()">Cancel</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+    <div class="nav-item active" onclick="switchView('workout', this)">
+        <span>🏋️</span>
+        <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" onclick="switchView('logs', this)">
+        <span>📅</span>
+        <div class="nav-dot"></div>
+    </div>
+</div>
+
+<script>
+    // --- Initial Theme Load ---
+    let isDarkMode = localStorage.getItem('workout_dark_mode') === 'true';
+    if (isDarkMode) document.documentElement.classList.add('dark-mode');
+
+    // --- Prebuilt Workout Library ---
+    const prebuiltWorkouts = {
+        male: {
+            push: {
+                title: '🔵 PUSH (Chest, Shoulders, Triceps)',
+                exercises: [
+                    { id: 'm-p1', name: 'Barbell Bench Press', sets: 3, reps: '6-8', media: [], completed: false },
+                    { id: 'm-p2', name: 'Incline Dumbbell Press', sets: 3, reps: '8-10', media: [], completed: false },
+                    { id: 'm-p3', name: 'Overhead Press (OHP)', sets: 3, reps: '8-10', media: [], completed: false },
+                    { id: 'm-p4', name: 'Lateral Raises', sets: 4, reps: '12-15', media: [], completed: false },
+                    { id: 'm-p5', name: 'Triceps Rope Pushdown', sets: 3, reps: '10-12', media: [], completed: false }
+                ]
+            },
+            pull: {
+                title: '🟢 PULL (Back & Biceps)',
+                exercises: [
+                    { id: 'm-pu1', name: 'Pull-Ups / Lat Pulldown', sets: 3, reps: '8-10', media: [], completed: false },
+                    { id: 'm-pu2', name: 'Barbell Row', sets: 3, reps: '6-8', media: [], completed: false },
+                    { id: 'm-pu3', name: 'Seated Cable Row', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'm-pu4', name: 'Face Pulls', sets: 3, reps: '15-20', media: [], completed: false },
+                    { id: 'm-pu5', name: 'Dumbbell Biceps Curl', sets: 3, reps: '10-12', media: [], completed: false }
+                ]
+            },
+            legs: {
+                title: '🟡 LEGS (Lower Body)',
+                exercises: [
+                    { id: 'm-l1', name: 'Barbell Back Squat', sets: 3, reps: '6-8', media: [], completed: false },
+                    { id: 'm-l2', name: 'Romanian Deadlift (RDL)', sets: 3, reps: '8-10', media: [], completed: false },
+                    { id: 'm-l3', name: 'Leg Press', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'm-l4', name: 'Seated Leg Curl', sets: 3, reps: '12-15', media: [], completed: false },
+                    { id: 'm-l5', name: 'Standing Calf Raises', sets: 4, reps: '12-15', media: [], completed: false }
+                ]
+            }
+        },
+        female: {
+            push: {
+                title: '🟣 UPPER BODY PUSH & TONE',
+                exercises: [
+                    { id: 'f-p1', name: 'Dumbbell Bench Press', sets: 3, reps: '8-12', media: [], completed: false },
+                    { id: 'f-p2', name: 'Seated Dumbbell Shoulder Press', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'f-p3', name: 'Cable Lateral Raises', sets: 3, reps: '12-15', media: [], completed: false },
+                    { id: 'f-p4', name: 'Push-Ups (Knee or Standard)', sets: 3, reps: '8-10', media: [], completed: false },
+                    { id: 'f-p5', name: 'Overhead Triceps Extension', sets: 3, reps: '12-15', media: [], completed: false }
+                ]
+            },
+            pull: {
+                title: '🟢 UPPER BODY PULL & POSTURE',
+                exercises: [
+                    { id: 'f-pu1', name: 'Lat Pulldown', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'f-pu2', name: 'Single-Arm Dumbbell Row', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'f-pu3', name: 'Face Pulls', sets: 3, reps: '15-20', media: [], completed: false },
+                    { id: 'f-pu4', name: 'Dumbbell Hammer Curls', sets: 3, reps: '12-15', media: [], completed: false }
+                ]
+            },
+            legs: {
+                title: '🔴 LOWER BODY & GLUTE BUILDER',
+                exercises: [
+                    { id: 'f-l1', name: 'Barbell Hip Thrust', sets: 4, reps: '8-10', media: [], completed: false },
+                    { id: 'f-l2', name: 'Goblet Squat', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'f-l3', name: 'Bulgarian Split Squats', sets: 3, reps: '10-12 per leg', media: [], completed: false },
+                    { id: 'f-l4', name: 'Dumbbell Romanian Deadlift', sets: 3, reps: '10-12', media: [], completed: false },
+                    { id: 'f-l5', name: 'Cable Kickbacks', sets: 3, reps: '12-15', media: [], completed: false }
+                ]
+            }
+        }
+    };
+
+    // --- Data & Initialization ---
+    const defaultData = [
+        {
+            id: 'day-1',
+            title: '🟥 WORKOUT 1 — CHEST + SHOULDERS + TRICEPS',
+            exercises: [
+                { id: '1', name: 'Bench Press', sets: 3, reps: '6–10', media: [], completed: false },
+                { id: '2', name: 'Incline Dumbbell Press', sets: 3, reps: '8–12', media: [], completed: false },
+                { id: '3', name: 'Cable Fly / Pec Deck', sets: 2, reps: '10–15', media: [], completed: false },
+                { id: '4', name: 'Shoulder Press', sets: 3, reps: '8–12', media: [], completed: false },
+                { id: '5', name: 'Lateral Raises', sets: 3, reps: '12–15', media: [], completed: false },
+                { id: '6', name: 'Triceps Pushdown', sets: 3, reps: '10–15', media: [], completed: false },
+                { id: '7', name: 'Overhead Triceps Extension', sets: 2, reps: '10–15', media: [], completed: false }
+            ]
+        }
+    ];
+
+    let routine = JSON.parse(localStorage.getItem('workout_routine_v7')) || defaultData;
+    let workoutLogs = JSON.parse(localStorage.getItem('workout_logs_history_v3')) || [];
+    let retentionMonths = parseInt(localStorage.getItem('workout_retention_months')) || 12;
+
+    let activeDayId = routine.length > 0 ? routine[0].id : null;
+    let expandedExId = null;
+    let editingExId = null;
+    let tempEditMedia = [];
+    let draggedIndex = null;
+    
+    let currentLogTab = 'list';
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth();
+    let analyticsRange = '30d';
+
+    function saveData() {
+        try {
+            localStorage.setItem('workout_routine_v7', JSON.stringify(routine));
+        } catch(e) {
+            alert('Storage limit reached! Avoid uploading large raw images directly.');
+        }
+    }
+
+    function saveLogsData() {
+        applyRetentionPolicy();
+        localStorage.setItem('workout_logs_history_v3', JSON.stringify(workoutLogs));
+    }
+
+    function applyRetentionPolicy() {
+        const cutoffDate = new Date();
+        cutoffDate.setMonth(cutoffDate.getMonth() - retentionMonths);
+        workoutLogs = workoutLogs.filter(log => {
+            const dt = new Date(log.rawDate || log.id);
+            return dt >= cutoffDate;
+        });
+    }
+
+    // --- Import Prebuilt Routine ---
+    function importPrebuiltRoutine() {
+        const gender = document.getElementById('prebuilt-gender').value;
+        const type = document.getElementById('prebuilt-type').value;
+        
+        const template = prebuiltWorkouts[gender][type];
+        if(!template) return;
+
+        const newDay = {
+            id: 'day-' + Date.now(),
+            title: template.title,
+            exercises: JSON.parse(JSON.stringify(template.exercises))
+        };
+
+        routine.push(newDay);
+        activeDayId = newDay.id;
+        saveData();
+        
+        alert(`✅ Successfully added "${template.title}" as a new workout day!`);
+        switchView('workout', document.querySelectorAll('.nav-item')[0]);
+    }
+
+    // --- Export / Import Backup ---
+    function exportData() {
+        const data = {
+            routine: routine,
+            logs: workoutLogs,
+            retention: retentionMonths
+        };
+        const dataStr = JSON.stringify(data);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const link = document.createElement('a');
+        link.setAttribute('href', dataUri);
+        link.setAttribute('download', 'workout_backup.json');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }
+
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.routine && Array.isArray(data.routine)) {
+                    routine = data.routine;
+                    workoutLogs = data.logs || [];
+                    retentionMonths = parseInt(data.retention) || 12;
+                    
+                    saveData();
+                    saveLogsData();
+                    localStorage.setItem('workout_retention_months', retentionMonths);
+                    
+                    alert('✅ Backup imported successfully!');
+                    switchLogTab('list');
+                    
+                    if (document.getElementById('view-workout').classList.contains('active')) {
+                        activeDayId = routine.length > 0 ? routine[0].id : null;
+                        renderWorkoutView();
+                    }
+                } else {
+                    alert('Invalid backup file format.');
+                }
+            } catch (err) {
+                alert('Error parsing backup file. Make sure it is a valid JSON file.');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    // --- View Navigation ---
+    function switchView(viewName, navElement) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(`view-${viewName}`).classList.add('active');
+        
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        navElement.classList.add('active');
+        
+        closeLogEdit(); 
+        
+        if(viewName === 'logs') {
+            if(currentLogTab === 'settings') currentLogTab = 'list';
+            renderLogsView();
+        } else {
+            renderWorkoutView();
+        }
+    }
+
+    function switchLogTab(tabName) {
+        currentLogTab = tabName;
+        document.querySelectorAll('.subnav-btn').forEach(btn => btn.classList.remove('active'));
+        if (tabName !== 'settings') {
+            const activeBtn = document.getElementById(`subnav-${tabName}`);
+            if(activeBtn) activeBtn.classList.add('active');
+        }
+        renderLogsView();
+    }
+
+    // --- Workout View Rendering ---
+    function renderTabs() {
+        const container = document.getElementById('day-tabs');
+        container.innerHTML = '';
+
+        routine.forEach(day => {
+            const pill = document.createElement('div');
+            pill.className = `tab-pill ${day.id === activeDayId ? 'active' : ''}`;
+            pill.innerText = day.title;
+            pill.onclick = () => {
+                activeDayId = day.id;
+                expandedExId = null;
+                editingExId = null;
+                renderWorkoutView();
+            };
+            container.appendChild(pill);
+        });
+    }
+
+    function renderWorkoutView() {
+        renderTabs();
+        
+        const list = document.getElementById('exercise-list');
+        const activeDay = routine.find(d => d.id === activeDayId);
+        const titleEl = document.getElementById('day-main-title');
+        const progressBar = document.getElementById('progress-bar');
+        const btnLog = document.getElementById('btn-log-workout');
+
+        if (!activeDay) {
+            titleEl.innerText = "No Days Found";
+            list.innerHTML = '<li style="padding: 20px; text-align: center; color: var(--text-muted);">Add a new day above!</li>';
+            progressBar.style.width = '0%';
+            btnLog.disabled = true;
+            return;
+        }
+
+        titleEl.innerText = activeDay.title;
+
+        const totalEx = activeDay.exercises.length;
+        const completedEx = activeDay.exercises.filter(e => e.completed).length;
+        progressBar.style.width = totalEx > 0 ? `${(completedEx / totalEx) * 100}%` : '0%';
+        btnLog.disabled = completedEx === 0;
+
+        list.innerHTML = '';
+
+        activeDay.exercises.forEach((ex, index) => {
+            const isExpanded = expandedExId === ex.id;
+            
+            const li = document.createElement('li');
+            li.className = `exercise-row ${ex.completed && editingExId !== ex.id ? 'completed' : ''} ${isExpanded ? 'expanded' : ''}`;
+            li.setAttribute('data-index', index);
+
+            if (editingExId === ex.id) {
+                li.setAttribute('draggable', 'false');
+                li.style.display = 'block'; 
+                li.style.padding = '0';
+                
+                let mediaListHtml = tempEditMedia.map((m, i) => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--card-bg); color:var(--text-main); padding:6px 10px; border:1px solid var(--border-color); border-radius:6px; margin-bottom:6px; font-size:0.8rem;">
+                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:80%;">Attachment ${i+1}</span>
+                        <button class="btn-icon" onclick="removeTempMedia(${i})" style="color:var(--accent-red); padding:2px; font-size:1.1rem; border:none; background:none;">&times;</button>
+                    </div>
+                `).join('');
+
+                li.innerHTML = `
+                    <div class="inline-edit-container" onpaste="handlePasteImage(event)">
+                        <input type="text" class="input-cell" id="inline-name" value="${ex.name}" placeholder="Exercise Name (e.g. Bench Press)" required>
+                        
+                        <div class="form-inputs-inline" style="margin-top:10px;">
+                            <input type="number" class="input-cell" id="inline-sets" value="${ex.sets}" placeholder="Sets" style="flex:1;" required>
+                            <input type="text" class="input-cell" id="inline-reps" value="${ex.reps}" placeholder="Reps (e.g. 8-12)" style="flex:2;" required>
+                        </div>
+                        
+                        <div style="margin-top:16px; background:var(--bg-color); padding:12px; border-radius:8px; border:1px dashed var(--border-color);">
+                            <div style="font-size:0.85rem; font-weight:700; margin-bottom:4px; color:var(--text-main);">Attachments (Web Link, Image, YouTube)</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:8px;">Tip: You can also directly paste an image from your clipboard (Ctrl+V / Long-press paste) here!</div>
+                            
+                            <div id="temp-media-list" style="margin-bottom: ${tempEditMedia.length ? '10px' : '0'};">
+                                ${mediaListHtml}
+                            </div>
+                            
+                            <div style="display:flex; gap: 6px;">
+                                <input type="text" class="input-cell" id="inline-media-url" placeholder="Paste URL here..." style="flex:1; padding:8px; font-size:0.85rem;">
+                                <button class="btn-submit" onclick="addUrlMedia()" style="padding:8px 12px; font-size:0.85rem; flex:none; border-radius:6px;">Add</button>
+                                <label class="file-upload-label" style="padding:8px; margin:0; flex:none; border-radius:6px;">
+                                    📁 <input type="file" accept="image/*" style="display:none;" onchange="handleInlineFileUpload(event)">
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-btn-row" style="margin-top:16px;">
+                            <button class="btn-submit" onclick="saveInlineEdit('${activeDay.id}', '${ex.id}')">Save</button>
+                            <button class="btn-cancel" onclick="cancelInlineEdit()">Cancel</button>
+                        </div>
+                        
+                        <div style="margin-top:16px; text-align:center; padding-top:14px; border-top:1px solid var(--border-color);">
+                            <button style="color:var(--accent-red); background:none; border:none; font-weight:700; font-size:0.9rem; cursor:pointer; padding:6px;" onclick="deleteExercise('${activeDay.id}', '${ex.id}')">
+                                🗑️ Delete Exercise
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                li.setAttribute('draggable', 'false');
+                
+                li.innerHTML = `
+                    <div class="drag-handle" draggable="true" title="Drag to reorder">≡</div>
+                    <div class="left-content" onclick="toggleExercise('${activeDay.id}', '${ex.id}')">
+                        <input type="checkbox" class="checkbox" ${ex.completed ? 'checked' : ''} onclick="event.stopPropagation(); toggleExercise('${activeDay.id}', '${ex.id}')">
+                        <div class="ex-info">
+                            <span class="ex-name">${ex.name || 'New Exercise'}</span>
+                            <span class="ex-details">${ex.sets} sets × ${ex.reps} reps</span>
+                            ${ex.media && ex.media.length > 0 ? `<span class="attachment-tag">📎 Tap arrow to view (${ex.media.length})</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="action-btns">
+                        <button class="btn-icon dropdown-arrow" onclick="toggleExpand('${ex.id}')" title="View Attachments & Options">
+                            ▼
+                        </button>
+                    </div>
+                `;
+            }
+
+            list.appendChild(li);
+
+            if (editingExId !== ex.id) {
+                const drawer = document.createElement('div');
+                drawer.className = 'drawer';
+                
+                const searchQuery = encodeURIComponent(ex.name + " exercise");
+                
+                drawer.innerHTML = `
+                    ${renderMediaContent(ex.media)}
+                    
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); display:flex; gap:8px; justify-content:center; align-items:center;">
+                        <a href="https://www.google.com/search?q=${searchQuery}" target="_blank" class="external-link-btn" style="display:inline-block; background:var(--pill-active-bg); color:var(--pill-active-text); padding:8px 14px; border-radius:8px; text-decoration:none; font-size:0.85rem; box-shadow: 0 2px 4px var(--shadow-color);">
+                            🔍 Search Web
+                        </a>
+                        <button class="btn-edit-day" onclick="openInlineEdit('${ex.id}')" title="Edit Exercise" style="width:36px; height:36px; background:var(--card-bg); border:1px solid var(--border-color); color:var(--text-main);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(drawer);
+            }
+        });
+
+        setupDragAndDrop();
+    }
+
+    function renderMediaContent(mediaArray) {
+        if (!mediaArray || mediaArray.length === 0) return '<div style="font-size:0.85rem; color:var(--text-muted); padding:4px;">No attachments added yet. Tap the edit icon below to add links or media.</div>';
+        
+        return mediaArray.map(media => {
+            const cleanMedia = media.trim();
+            
+            const isImage = cleanMedia.match(/\.(jpeg|jpg|gif|png|webp|svg)($|\?)/i) || cleanMedia.startsWith('data:image/');
+            const ytMatch = cleanMedia.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/i);
+
+            if (isImage) {
+                return `<img src="${cleanMedia}" class="media-preview" alt="Attachment" onerror="this.replaceWith('Failed to load image')">`;
+            } else if (ytMatch && ytMatch[1]) {
+                return `
+                    <div style="margin-bottom:12px;">
+                        <iframe width="100%" height="220" src="https://www.youtube.com/embed/${ytMatch[1]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:10px; border:1px solid var(--border-color); margin-bottom:4px; background:#000;"></iframe>
+                        <a href="${cleanMedia}" target="_blank" style="font-size:0.75rem; color:var(--accent-blue); text-decoration:none; display:block; padding-bottom:6px;">Open in YouTube 🔗</a>
+                    </div>
+                `;
+            } else {
+                const displayUrl = cleanMedia.length > 35 ? cleanMedia.substring(0, 35) + '...' : cleanMedia;
+                const validLink = cleanMedia.startsWith('http') ? cleanMedia : 'https://' + cleanMedia;
+                return `
+                    <a href="${validLink}" target="_blank" style="display:block; padding:10px; background:rgba(3, 105, 161, 0.1); color:var(--accent-blue); border-radius:8px; text-decoration:none; font-weight:600; font-size:0.85rem; margin-bottom:12px; border:1px solid rgba(3, 105, 161, 0.2); text-align:left; word-break:break-all;">
+                        🌐 Open Link: <br><span style="font-weight:400; font-size:0.75rem;">${displayUrl}</span>
+                    </a>
+                `;
+            }
+        }).join('');
+    }
+
+    function toggleExpand(exId) {
+        expandedExId = expandedExId === exId ? null : exId;
+        renderWorkoutView();
+    }
+
+    function toggleExercise(dayId, exId) {
+        const day = routine.find(d => d.id === dayId);
+        if (day) {
+            const ex = day.exercises.find(e => e.id === exId);
+            if (ex) {
+                ex.completed = !ex.completed;
+                saveData();
+                renderWorkoutView();
+            }
+        }
+    }
+
+    function resetChecklist() {
+        const day = routine.find(d => d.id === activeDayId);
+        if (day && confirm('Uncheck all exercises for this day?')) {
+            day.exercises.forEach(e => e.completed = false);
+            saveData();
+            renderWorkoutView();
+        }
+    }
+
+    function promptAddDay() {
+        const title = prompt('Enter New Day Title (e.g. Leg Day):');
+        if (title && title.trim()) {
+            const newDay = {
+                id: 'day-' + Date.now(),
+                title: title.trim(),
+                exercises: []
+            };
+            routine.push(newDay);
+            activeDayId = newDay.id;
+            saveData();
+            renderWorkoutView();
+        }
+    }
+
+    function openDayEditModal() {
+        const day = routine.find(d => d.id === activeDayId);
+        if (!day) return;
+        
+        const newTitle = prompt('Edit Day Title or type "DELETE" to remove this day:', day.title);
+        if (newTitle !== null) {
+            if (newTitle.trim().toUpperCase() === 'DELETE') {
+                removeActiveDay();
+            } else if (newTitle.trim()) {
+                day.title = newTitle.trim();
+                saveData();
+                renderWorkoutView();
+            }
+        }
+    }
+    
+    function removeActiveDay() {
+        const day = routine.find(d => d.id === activeDayId);
+        if (!day) return;
+        if (confirm(`Are you sure you want to delete "${day.title}" entirely? This cannot be undone.`)) {
+            routine = routine.filter(d => d.id !== activeDayId);
+            activeDayId = routine.length > 0 ? routine[0].id : null;
+            saveData();
+            renderWorkoutView();
+        }
+    }
+
+    function addNewExercise() {
+        const day = routine.find(d => d.id === activeDayId);
+        if (!day) return;
+        
+        const newEx = {
+            id: 'ex-' + Date.now(),
+            name: '',
+            sets: 3,
+            reps: '8-12',
+            media: [],
+            completed: false
+        };
+        
+        day.exercises.push(newEx);
+        editingExId = newEx.id;
+        tempEditMedia = [];
+        expandedExId = null;
+        renderWorkoutView();
+        
+        setTimeout(() => {
+            const nameInput = document.getElementById('inline-name');
+            if(nameInput) nameInput.focus();
+        }, 50);
+    }
+
+    function openInlineEdit(exId) {
+        const day = routine.find(d => d.id === activeDayId);
+        if (!day) return;
+        const ex = day.exercises.find(e => e.id === exId);
+        if (!ex) return;
+
+        editingExId = exId;
+        tempEditMedia = [...(ex.media || [])];
+        expandedExId = null; 
+        renderWorkoutView();
+    }
+
+    function cancelInlineEdit() {
+        const day = routine.find(d => d.id === activeDayId);
+        const ex = day.exercises.find(e => e.id === editingExId);
+        if (ex && ex.name.trim() === '') {
+            day.exercises = day.exercises.filter(e => e.id !== editingExId);
+        }
+        
+        editingExId = null;
+        tempEditMedia = [];
+        renderWorkoutView();
+    }
+
+    function saveInlineEdit(dayId, exId) {
+        const day = routine.find(d => d.id === dayId);
+        const ex = day.exercises.find(e => e.id === exId);
+        
+        ex.name = document.getElementById('inline-name').value.trim() || 'Untitled Exercise';
+        ex.sets = document.getElementById('inline-sets').value || 1;
+        ex.reps = document.getElementById('inline-reps').value.trim() || '1';
+        ex.media = [...tempEditMedia];
+        
+        saveData();
+        editingExId = null;
+        tempEditMedia = [];
+        renderWorkoutView();
+    }
+
+    function deleteExercise(dayId, exId) {
+        const day = routine.find(d => d.id === dayId);
+        if (day && confirm('Delete this exercise?')) {
+            day.exercises = day.exercises.filter(e => e.id !== exId);
+            editingExId = null;
+            tempEditMedia = [];
+            saveData();
+            renderWorkoutView();
+        }
+    }
+
+    function addUrlMedia() {
+        const urlInput = document.getElementById('inline-media-url');
+        if(urlInput && urlInput.value.trim()) {
+            tempEditMedia.push(urlInput.value.trim());
+            urlInput.value = '';
+            renderWorkoutView();
+        }
+    }
+
+    function handleInlineFileUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            tempEditMedia.push(evt.target.result);
+            renderWorkoutView();
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function handlePasteImage(e) {
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const blob = items[i].getAsFile();
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    tempEditMedia.push(evt.target.result);
+                    renderWorkoutView();
+                };
+                reader.readAsDataURL(blob);
+                e.preventDefault();
+                break;
+            }
+        }
+    }
+
+    function removeTempMedia(index) {
+        tempEditMedia.splice(index, 1);
+        renderWorkoutView();
+    }
+
+    function setupDragAndDrop() {
+        const list = document.getElementById('exercise-list');
+        const handles = list.querySelectorAll('.drag-handle');
+
+        handles.forEach((handle, index) => {
+            const row = handle.closest('.exercise-row');
+
+            handle.addEventListener('dragstart', (e) => {
+                draggedIndex = index;
+                row.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            handle.addEventListener('dragend', () => {
+                row.classList.remove('dragging');
+                draggedIndex = null;
+                list.querySelectorAll('.exercise-row').forEach(r => r.classList.remove('drag-over'));
+            });
+
+            row.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                if (draggedIndex !== null && draggedIndex !== index) {
+                    row.classList.add('drag-over');
+                }
+            });
+
+            row.addEventListener('dragleave', () => {
+                row.classList.remove('drag-over');
+            });
+
+            row.addEventListener('drop', (e) => {
+                e.preventDefault();
+                row.classList.remove('drag-over');
+                if (draggedIndex !== null && draggedIndex !== index) {
+                    const day = routine.find(d => d.id === activeDayId);
+                    if (day) {
+                        const [moved] = day.exercises.splice(draggedIndex, 1);
+                        day.exercises.splice(index, 0, moved);
+                        saveData();
+                        renderWorkoutView();
+                    }
+                }
+            });
+        });
+    }
+
+    function saveWorkoutLog() {
+        const day = routine.find(d => d.id === activeDayId);
+        if (!day) return;
+        
+        const completedEx = day.exercises.filter(e => e.completed);
+        if (completedEx.length === 0) return;
+
+        const dateObj = new Date();
+        const dateStr = dateObj.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const logEntry = {
+            id: Date.now(),
+            rawDate: dateObj.toISOString(),
+            timestamp: `${dateStr} at ${timeStr}`,
+            dayTitle: day.title,
+            exercises: completedEx.map(e => `${e.name} (${e.sets} × ${e.reps})`)
+        };
+
+        workoutLogs.unshift(logEntry);
+        saveLogsData();
+
+        alert(`✅ Workout successfully saved to Calendar Log!\n\nLogged ${completedEx.length} exercises for ${day.title}.`);
+        
+        day.exercises.forEach(e => e.completed = false);
+        saveData();
+        renderWorkoutView();
+    }
+
+    // --- Logs, Calendar, Insights & Settings Views ---
+    function renderLogsView() {
+        const container = document.getElementById('logs-content-area');
+        const subnavBar = document.getElementById('logs-subnav-bar');
+        
+        if (currentLogTab === 'settings') {
+            subnavBar.style.display = 'none';
+            renderSettingsTab(container);
+            return;
+        }
+
+        subnavBar.style.display = 'flex';
+
+        if (currentLogTab === 'list') {
+            renderListLogs(container);
+        } else if (currentLogTab === 'calendar') {
+            renderCalendarLogs(container);
+        } else if (currentLogTab === 'analytics') {
+            renderAnalytics(container);
+        }
+    }
+
+    function renderSettingsTab(container) {
+        container.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <div style="font-weight:800; font-size:1.3rem; color:var(--text-main);">Settings</div>
+                <button class="btn-cancel" onclick="switchLogTab('list')" style="padding:6px 14px;">Back</button>
+            </div>
+
+            <!-- Appearance (Dark Mode) -->
+            <div class="analytics-card" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div class="analytics-title" style="margin:0; font-size:0.9rem;">Appearance</div>
+                    <div style="font-size:0.82rem; color:var(--text-muted);">Toggle Dark Mode</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="dark-mode-toggle" ${isDarkMode ? 'checked' : ''} onchange="toggleDarkMode()">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <!-- Prebuilt Workouts Generator -->
+            <div class="analytics-card" style="margin-bottom:12px;">
+                <div class="analytics-title" style="font-size:0.9rem;">Prebuilt Workouts</div>
+                <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:10px;">
+                    Instantly load professional workout splits into your routines:
+                </div>
+                
+                <div style="display:flex; gap:8px; margin-bottom:8px;">
+                    <select id="prebuilt-gender" class="input-cell" style="flex:1; padding:8px; font-size:0.85rem;">
+                        <option value="male">Male Focus</option>
+                        <option value="female">Female Focus</option>
+                    </select>
+                    <select id="prebuilt-type" class="input-cell" style="flex:2; padding:8px; font-size:0.85rem;">
+                        <option value="push">Push (Chest/Shoulders/Triceps)</option>
+                        <option value="pull">Pull (Back/Biceps)</option>
+                        <option value="legs">Legs (Lower Body)</option>
+                    </select>
+                </div>
+
+                <button class="btn-submit" onclick="importPrebuiltRoutine()" style="width:100%; padding:10px; font-size:0.85rem; background:#10b981;">📥 Import Routine as New Day</button>
+            </div>
+
+            <!-- Backup & Restore -->
+            <div class="analytics-card" style="margin-bottom:12px;">
+                <div class="analytics-title" style="font-size:0.9rem;">Data Backup</div>
+                <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:10px;">
+                    Export your data to move to another device, or import a backup file to restore.
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-submit" onclick="exportData()" style="padding:8px; font-size:0.85rem; background:#10b981; color:#fff;">⬇️ Export</button>
+                    <button class="btn-submit" onclick="document.getElementById('import-file').click()" style="padding:8px; font-size:0.85rem; background:#3b82f6; color:#fff;">⬆️ Import</button>
+                    <input type="file" id="import-file" style="display:none" accept=".json" onchange="importData(event)">
+                </div>
+            </div>
+
+            <!-- History Retention Dropdown -->
+            <div class="analytics-card" style="margin-bottom:12px;">
+                <div class="analytics-title" style="font-size:0.9rem;">History Retention Policy</div>
+                <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:10px;">
+                    Automatically keep history logs for:
+                </div>
+                <select id="retention-select" class="input-cell" onchange="setRetention(this.value)" style="width:100%; font-weight:600; padding:10px;">
+                    <option value="6" ${retentionMonths===6?'selected':''}>6 Months</option>
+                    <option value="12" ${retentionMonths===12?'selected':''}>1 Year</option>
+                    <option value="24" ${retentionMonths===24?'selected':''}>2 Years</option>
+                </select>
+            </div>
+
+            <div style="text-align:center;">
+                <button class="btn-cancel" onclick="clearAllLogsConfirm()" style="color:#ef4444; width:100%; font-weight:700; background:rgba(239, 68, 68, 0.15);">Clear All History Logs</button>
+            </div>
+        `;
+    }
+
+    function renderListLogs(container) {
+        if (workoutLogs.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; color:var(--text-muted); padding: 40px 20px;">
+                    <div style="font-size: 3rem; margin-bottom:16px;">📅</div>
+                    <h3>No Logs Yet</h3>
+                    <p>Complete exercises and tap 'Save to Calendar Log' to see your history here.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = workoutLogs.map(log => `
+            <div class="log-card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <div class="log-date">${log.timestamp}</div>
+                        <div class="log-title">${log.dayTitle}</div>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-icon" onclick="editLog(${log.id})" style="font-size:0.95rem; padding:4px;">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </button>
+                        <button class="btn-icon" onclick="deleteLog(${log.id})" style="font-size:0.95rem; padding:4px; color:var(--accent-red);">🗑️</button>
+                    </div>
+                </div>
+                <ul class="log-items">
+                    ${log.exercises.map(ex => `<li>✅ ${ex}</li>`).join('')}
+                </ul>
+            </div>
+        `).join('');
+    }
+
+    function renderCalendarLogs(container) {
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        
+        const firstDayIndex = new Date(calYear, calMonth, 1).getDay();
+        const totalDays = new Date(calYear, calMonth + 1, 0).getDate();
+
+        const workoutDates = {};
+        workoutLogs.forEach(log => {
+            const d = new Date(log.rawDate || log.id);
+            if (!isNaN(d.getTime())) {
+                const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                workoutDates[key] = workoutDates[key] || [];
+                workoutDates[key].push(log);
+            }
+        });
+
+        let gridCells = '';
+        for(let i = 0; i < firstDayIndex; i++) {
+            gridCells += `<div class="cal-cell empty"></div>`;
+        }
+
+        for(let day = 1; day <= totalDays; day++) {
+            const key = `${calYear}-${calMonth}-${day}`;
+            const hasW = workoutDates[key] ? 'has-workout' : '';
+            const count = workoutDates[key] ? workoutDates[key].length : '';
+            
+            gridCells += `
+                <div class="cal-cell ${hasW}" onclick="selectCalDay(${calYear}, ${calMonth}, ${day})">
+                    <span>${day}</span>
+                    ${count ? `<span style="font-size:0.65rem; background:var(--success); color:#fff; border-radius:10px; padding:0 4px; margin-top:2px;">${count}</span>` : ''}
+                </div>
+            `;
+        }
+
+        container.innerHTML = `
+            <div class="calendar-card">
+                <div class="calendar-header">
+                    <button class="header-link" onclick="changeMonth(-1)">◀ Prev</button>
+                    <span style="font-weight:700; font-size:1rem; color:var(--text-main);">${monthNames[calMonth]} ${calYear}</span>
+                    <button class="header-link" onclick="changeMonth(1)">Next ▶</button>
+                </div>
+
+                <div class="calendar-grid">
+                    <div class="cal-day-header">Su</div>
+                    <div class="cal-day-header">Mo</div>
+                    <div class="cal-day-header">Tu</div>
+                    <div class="cal-day-header">We</div>
+                    <div class="cal-day-header">Th</div>
+                    <div class="cal-day-header">Fr</div>
+                    <div class="cal-day-header">Sa</div>
+                    ${gridCells}
+                </div>
+            </div>
+            <div id="cal-day-details"></div>
+        `;
+    }
+
+    function changeMonth(direction) {
+        calMonth += direction;
+        if(calMonth > 11) {
+            calMonth = 0;
+            calYear++;
+        } else if(calMonth < 0) {
+            calMonth = 11;
+            calYear--;
+        }
+        renderLogsView();
+    }
+
+    function selectCalDay(y, m, d) {
+        const matched = workoutLogs.filter(log => {
+            const dt = new Date(log.rawDate || log.id);
+            return dt.getFullYear() === y && dt.getMonth() === m && dt.getDate() === d;
+        });
+
+        const detailsContainer = document.getElementById('cal-day-details');
+        if(matched.length === 0) {
+            detailsContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:12px; font-size:0.85rem;">No workouts recorded on ${m+1}/${d}/${y}.</div>`;
+            return;
+        }
+
+        detailsContainer.innerHTML = `
+            <div style="font-weight:700; font-size:0.95rem; margin-bottom:8px; color:var(--text-main);">Workouts on ${m+1}/${d}/${y}:</div>
+            ${matched.map(log => `
+                <div class="log-card" style="margin-bottom:8px; padding:12px;">
+                    <div class="log-date">${log.timestamp}</div>
+                    <div class="log-title" style="font-size:1rem;">${log.dayTitle}</div>
+                    <ul class="log-items">
+                        ${log.exercises.map(ex => `<li>✅ ${ex}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('')}
+        `;
+    }
+
+    function renderAnalytics(container) {
+        const counts = {};
+        let totalCount = 0;
+
+        const now = new Date();
+        const filteredLogs = workoutLogs.filter(log => {
+            const dt = new Date(log.rawDate || log.id);
+            const diffTime = now - dt;
+            const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+            if(analyticsRange === '30d') return diffDays <= 30;
+            if(analyticsRange === '3m') return diffDays <= 90;
+            if(analyticsRange === '6m') return diffDays <= 180;
+            if(analyticsRange === '1y') return diffDays <= 365;
+            return true;
+        });
+
+        filteredLogs.forEach(log => {
+            const title = log.dayTitle || 'Workout';
+            counts[title] = (counts[title] || 0) + 1;
+            totalCount++;
+        });
+
+        let barsHtml = '';
+        if(totalCount === 0) {
+            barsHtml = `<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:0.85rem;">No workout data available for this range.</div>`;
+        } else {
+            const maxVal = Math.max(...Object.values(counts));
+            barsHtml = Object.entries(counts).map(([title, count]) => {
+                const pct = Math.round((count / maxVal) * 100);
+                return `
+                    <div class="bar-row">
+                        <span class="bar-label" title="${title}">${title}</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: ${pct}%;"></div>
+                        </div>
+                        <span class="bar-count">${count}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        container.innerHTML = `
+            <div class="analytics-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <div class="analytics-title" style="margin:0;">Workout Distribution</div>
+                    <div style="display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px; max-width:65%;">
+                        <button class="subnav-btn ${analyticsRange==='30d'?'active':''}" onclick="setAnalyticsRange('30d')" style="padding:4px 6px; font-size:0.7rem; flex:none;">30d</button>
+                        <button class="subnav-btn ${analyticsRange==='3m'?'active':''}" onclick="setAnalyticsRange('3m')" style="padding:4px 6px; font-size:0.7rem; flex:none;">3m</button>
+                        <button class="subnav-btn ${analyticsRange==='6m'?'active':''}" onclick="setAnalyticsRange('6m')" style="padding:4px 6px; font-size:0.7rem; flex:none;">6m</button>
+                        <button class="subnav-btn ${analyticsRange==='1y'?'active':''}" onclick="setAnalyticsRange('1y')" style="padding:4px 6px; font-size:0.7rem; flex:none;">1y</button>
+                        <button class="subnav-btn ${analyticsRange==='all'?'active':''}" onclick="setAnalyticsRange('all')" style="padding:4px 6px; font-size:0.7rem; flex:none;">All</button>
+                    </div>
+                </div>
+                
+                <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:14px;">
+                    Total completed workout sessions logged: <strong style="color:var(--text-main);">${totalCount}</strong>
+                </div>
+
+                <div class="bar-chart-container">
+                    ${barsHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    function setAnalyticsRange(range) {
+        analyticsRange = range;
+        renderLogsView();
+    }
+
+    // --- Dark Mode Logic ---
+    function toggleDarkMode() {
+        isDarkMode = document.getElementById('dark-mode-toggle').checked;
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark-mode');
+        } else {
+            document.documentElement.classList.remove('dark-mode');
+        }
+        localStorage.setItem('workout_dark_mode', isDarkMode);
+    }
+
+    function setRetention(months) {
+        retentionMonths = parseInt(months);
+        localStorage.setItem('workout_retention_months', retentionMonths);
+        saveLogsData();
+    }
+
+    // -- Logs Edit/Delete Logic --
+    function deleteLog(id) {
+        if (confirm('Delete this workout log?')) {
+            workoutLogs = workoutLogs.filter(l => l.id !== id);
+            saveLogsData();
+            renderLogsView();
+        }
+    }
+    
+    function editLog(id) {
+        const log = workoutLogs.find(l => l.id === id);
+        if (!log) return;
+        
+        document.getElementById('edit-log-id').value = log.id;
+        document.getElementById('edit-log-title').value = log.dayTitle;
+        
+        const d = new Date(log.rawDate || log.id);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        document.getElementById('edit-log-date-picker').value = `${yyyy}-${mm}-${dd}`;
+
+        document.getElementById('edit-log-exercises').value = log.exercises.join('\n');
+        
+        document.getElementById('log-edit-modal').style.display = 'block';
+    }
+    
+    function closeLogEdit() {
+        document.getElementById('log-edit-modal').style.display = 'none';
+    }
+    
+    function saveLogEdit() {
+        const id = parseInt(document.getElementById('edit-log-id').value);
+        const log = workoutLogs.find(l => l.id === id);
+        if (log) {
+            log.dayTitle = document.getElementById('edit-log-title').value.trim();
+            
+            const dateVal = document.getElementById('edit-log-date-picker').value;
+            if(dateVal) {
+                const parts = dateVal.split('-');
+                const newDate = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+                log.rawDate = newDate.toISOString();
+                log.timestamp = newDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) + ' (Edited)';
+            }
+            
+            const lines = document.getElementById('edit-log-exercises').value.split('\n');
+            log.exercises = lines.map(l => l.trim()).filter(l => l !== '');
+            
+            saveLogsData();
+            closeLogEdit();
+            renderLogsView();
+        }
+    }
+
+    function clearAllLogsConfirm() {
+        if (workoutLogs.length > 0 && confirm("Are you sure you want to delete all saved workout logs? This cannot be undone.")) {
+            workoutLogs = [];
+            saveLogsData();
+            switchLogTab('list');
+        }
+    }
+
+    // Init
+    renderWorkoutView();
+</script>
+
+</body>
+</html>
